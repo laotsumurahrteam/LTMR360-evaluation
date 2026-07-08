@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ລະບົບປະເມີນອອນລາຍ 360 Degree Feedback</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Fonts: Noto Sans Lao & Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Lao:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+html, body {
+font-family: 'Noto Sans Lao', 'Inter', sans-serif !important;
+background-color: #f3f4f6;
+}
+* {
+font-family: inherit;
+}
+/* Custom scrollbar for clean UI */
+::-webkit-scrollbar {
+width: 6px;
+}
+::-webkit-scrollbar-track {
+background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+background: #10b981;
+border-radius: 10px;
+}
+</style>
+</head>
+<body class="min-height-screen flex flex-col justify-between bg-slate-50 text-slate-800">
+
+<!-- TOP NAVIGATION & BRANDING -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 py-3 shadow-sm">
+<div class="max-w-4xl mx-auto flex justify-between items-center">
+<div class="flex items-center space-x-3">
+<div class="bg-emerald-600 text-white p-2 rounded-lg flex items-center justify-center shadow-md">
+<i class="fa-solid fa-sync-alt text-lg"></i>
+</div>
+<div>
+<h1 class="text-md md:text-lg font-bold text-emerald-800">360° Feedback System</h1>
+<p class="text-xs text-slate-500">ລະບົບປະເມີນຜົນອອນລາຍ ປະຈຳປີ 2026</p>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<!-- Data Management & n8n Gear Button -->
+<button onclick="openAuthModal()" class="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors duration-200" title="ຕັ້ງຄ່າຂໍ້ມູນ & Webhook">
+<i class="fa-solid fa-gear text-xl"></i>
+</button>
+<span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-1 rounded-full border border-emerald-200">
+Active
+</span>
+</div>
+</div>
+</header>
+
+<!-- MAIN CONTENT CONTAINER -->
+<main class="flex-grow p-4 md:p-8 flex items-center justify-center">
+<div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transition-all duration-300">
+<!-- Progress Tracker Bar (Hidden on Start screen) -->
+<div id="progressBarContainer" class="w-full bg-slate-100 h-2 hidden">
+<div id="progressBar" class="bg-emerald-500 h-2 transition-all duration-500 w-0"></div>
+</div>
+
+<div class="p-6 md:p-8">
+<!-- STEP 1: WELCOME & LOGIN -->
+<div id="step-1" class="step-content">
+<div class="text-center mb-6">
+<div class="w-20 h-20 bg-emerald-50 rounded-full mx-auto flex items-center justify-center mb-4 border border-emerald-100">
+<i class="fa-solid fa-users text-emerald-600 text-3xl"></i>
+</div>
+<h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-1">ລະບົບປະເມີນຜົນການເຮັດວຽກ 360 ອົງສາ</h2>
+<p class="text-emerald-600 font-semibold text-sm">ບໍລິສັດລາວສືມຸລະ ຈຳກັດ</p>
+<p class="text-xs text-slate-400 mt-2">ກະລຸນາເລືອກ ແລະ ປ້ອນຂໍ້ມູນເພື່ອເລີ່ມຕົ້ນການປະເມີນຜົນ</p>
+</div>
+
+<!-- Disclaimer Box -->
+<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6">
+<h4 class="text-emerald-800 font-bold text-sm mb-1 flex items-center">
+<i class="fa-solid fa-circle-info mr-2"></i> ຄຳຊີ້ແຈງຄວາມລັບ
+</h4>
+<p class="text-xs text-emerald-700 leading-relaxed">
+"ແບບປະເມີນນີ້ຈັດທຳຂຶ້ນເພື່ອນຳຜົນໄປໃຊ້ໃນການພັດທະນາພະນັກງານ. ຂໍ້ມູນທັງໝົດຈະຖືກເກັບໄວ້ເປັນຄວາມລັບຢ່າງສູງສຸດ." ກະລຸນາປະເມີນຕາມຄວາມເປັນຈິງ.
+</p>
+</div>
+
+<!-- Form Inputs -->
+<div class="space-y-4">
+<div>
+<label class="block text-slate-700 text-sm font-semibold mb-1.5" for="targetName">
+<i class="fa-solid fa-user-check text-emerald-600 mr-1.5"></i> ເລືອກຜູ້ຮັບການປະເມີນ (ຊື່ພະນັກງານ):
+</label>
+<select id="targetName" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all text-sm">
+<!-- Dynamic options loaded from LocalStorage or Default list -->
+</select>
+</div>
+
+<div>
+<label class="block text-slate-700 text-sm font-semibold mb-1.5" for="evaluatorRole">
+<i class="fa-solid fa-user-tag text-emerald-600 mr-1.5"></i> ບົດບາດຂອງທ່ານ (ຜູ້ປະເມີນ):
+</label>
+<select id="evaluatorRole" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all text-sm">
+<option value="" disabled selected>-- ເລືອກບົດບາດຂອງທ່ານ --</option>
+<option value="ຫົວໜ້າງານ">ຫົວໜ້າງານ (Supervisor)</option>
+<option value="ເພື່ອນຮ່ວມງານ">ເພື່ອນຮ່ວມງານ (Peer)</option>
+<option value="ຜູ້ໃຕ້ບັງຄັບບັນຊາ">ຜູ້ໃຕ້ບັງຄັບບັນຊາ (Subordinate)</option>
+<option value="ປະເມີນຕົນເອງ">ປະເມີນຕົນເອງ (Self-Evaluation)</option>
+</select>
+</div>
+
+<div>
+<label class="block text-slate-700 text-sm font-semibold mb-1.5" for="department">
+<i class="fa-solid fa-building text-emerald-600 mr-1.5"></i> ພະແນກ / ໜ່ວຍງານ:
+</label>
+<select id="department" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white transition-all text-sm">
+<!-- Dynamic options loaded from LocalStorage or Default list -->
+</select>
+</div>
+
+<div>
+<label class="block text-slate-700 text-sm font-semibold mb-1.5">
+<i class="fa-solid fa-calendar-days text-emerald-600 mr-1.5"></i> ຮອບການປະເມີນ:
+</label>
+<input type="text" value="ປະຈຳປີ 2026" readonly class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed font-medium text-sm">
+</div>
+</div>
+
+<div class="mt-8">
+<button onclick="nextStep(2)" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 text-md">
+<span>ເລີ່ມການປະເມີນ</span>
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+
+<!-- STEP 2: COMPETENCY PART 1 -->
+<div id="step-2" class="step-content hidden">
+<div class="mb-6 flex justify-between items-center">
+<span class="text-xs font-semibold bg-emerald-100 text-emerald-800 py-1 px-3 rounded-full">ຂັ້ນຕອນທີ 1: ຄວາມຮັບຜິດຊອບ & ຄຸນນະພາບ</span>
+<span class="text-xs text-slate-500 font-medium">ໜ້າ 1 / 3</span>
+</div>
+
+<!-- Rating Reference Card -->
+<div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-200">
+<h4 class="text-slate-800 font-bold text-xs mb-2 uppercase tracking-wide">ຄຳອະທິບາຍລະດັບຄະແນນ:</h4>
+<div class="grid grid-cols-5 gap-1 text-center text-[10px] md:text-xs">
+<div class="p-1.5 bg-red-50 text-red-700 rounded-lg border border-red-100 font-medium">1: ປັບປຸງດ່ວນ</div>
+<div class="p-1.5 bg-orange-50 text-orange-700 rounded-lg border border-orange-100 font-medium">2: ຄວນປັບປຸງ</div>
+<div class="p-1.5 bg-yellow-50 text-yellow-700 rounded-lg border border-yellow-100 font-medium">3: ດີ</div>
+<div class="p-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-100 font-medium">4: ດີຫຼາຍ</div>
+<div class="p-1.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 font-medium">5: ດີເລີດ</div>
+</div>
+</div>
+
+<div class="space-y-6">
+<!-- Category 1 -->
+<div>
+<h3 class="text-md font-bold text-slate-800 border-l-4 border-emerald-500 pl-2 mb-3">ໝວດທີ 1: ຄວາມຮັບຜິດຊອບ ແລະ ວິໄນໃນການເຮັດວຽກ</h3>
+<div class="space-y-4">
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">1.1 ປະຕິບັດໜ້າທີ່ໄດ້ຄົບຖ້ວນ ແລະ ມີຄວາມຮັບຜິດຊອບຕໍ່ວຽກງານ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_1_1"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">1.2 ມາເຮັດວຽກຕົງເວລາ ແລະ ປະຕິບັດຕາມລະບຽບວິໄນຢ່າງເຄັ່ງຄັດ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_1_2"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">1.3 ມີຄວາມຮັບຜິດຊອບຕໍ່ຜົນງານ ແລະ ຄວາມຜິດພາດຂອງຕົນເອງ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_1_3"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Category 2 -->
+<div>
+<h3 class="text-md font-bold text-slate-800 border-l-4 border-emerald-500 pl-2 mb-3">ໝວດທີ 2: ຄຸນນະພາບ ແລະ ປະສິດທິພາບໃນການເຮັດວຽກ</h3>
+<div class="space-y-4">
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">2.1 ເຮັດວຽກໄດ້ຕາມເປົ້າໝາຍ ຫຼື KPI ທີ່ກຳນົດໄວ້</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_2_1"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">2.2 ຜົນງານມີຄວາມຖືກຕ້ອງ, ລະອຽດຮອບຄອບ ແລະ ເປັນລະບຽບ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_2_2"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">2.3 ສາມາດບໍລິຫານເວລາ ແລະ ຈັດລຳດັບຄວາມສຳຄັນຂອງວຽກໄດ້ດີ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_2_3"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="mt-8 flex space-x-3">
+<button onclick="prevStep(1)" class="w-1/3 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-3.5 px-4 rounded-xl transition-all duration-200 text-sm">
+ກັບຄືນ
+</button>
+<button onclick="nextStep(3)" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 text-sm">
+<span>ຖັດໄປ</span>
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+
+<!-- STEP 3: COMPETENCY PART 2 -->
+<div id="step-3" class="step-content hidden">
+<div class="mb-6 flex justify-between items-center">
+<span class="text-xs font-semibold bg-emerald-100 text-emerald-800 py-1 px-3 rounded-full">ຂັ້ນຕອນທີ 2: ການສື່ສານ, ຄວາມເປັນຜູ້ນຳ & ທັດສະນະຄະຕິ</span>
+<span class="text-xs text-slate-500 font-medium">ໜ້າ 2 / 3</span>
+</div>
+
+<div class="space-y-6">
+<!-- Category 3 -->
+<div>
+<h3 class="text-md font-bold text-slate-800 border-l-4 border-emerald-500 pl-2 mb-3">ໝວດທີ 3: ການສື່ສານ ແລະ ການເຮັດວຽກເປັນທີມ</h3>
+<div class="space-y-4">
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">3.1 ການສື່ສານມີຄວາມຊັດເຈນ, ສ້າງສັນ ແລະ ເຂົ້າໃຈງ່າຍ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_3_1"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">3.2 ຮັບຟັງຄວາມຄິດເຫັນຂອງເພື່ອນຮ່ວມງານ ແລະ ຜູ້ອື່ນດ້ວຍຄວາມເຄົາລົບ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_3_2"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">3.3 ສາມາດເຮັດວຽກຮ່ວມກັບຄົນອື່ນໃນທີມ ແລະ ຕ່າງພະແນກໄດ້ເປັນຢ່າງດີ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_3_3"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Category 4 -->
+<div>
+<h3 class="text-md font-bold text-slate-800 border-l-4 border-emerald-500 pl-2 mb-3">ໝວດທີ 4: ຄວາມເປັນຜູ້ນຳ (ສຳລັບຕຳແໜ່ງຫົວໜ້າງານ)</h3>
+<div class="space-y-4">
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">4.1 ມອບໝາຍວຽກໄດ້ເໝາະສົມກັບຄວາມຮູ້ ແລະ ຄວາມສາມາດຂອງທີມງານ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_4_1"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">4.2 ໃຫ້ຄຳແນະນຳ, ຄຳປຶກສາ ແລະ ສົ່ງເສີມການພັດທະນາຂອງທີມງານ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_4_2"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">4.3 ເປັນແບບຢ່າງທີ່ດີ (Role Model) ໃນການເຮັດວຽກ ແລະ ຄວາມຮັບຜິດຊອບ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_4_3"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Category 5 -->
+<div>
+<h3 class="text-md font-bold text-slate-800 border-l-4 border-emerald-500 pl-2 mb-3">ໝວດທີ 5: ທັດສະນະຄະຕິ ແລະ ພຶດຕິກຳໃນການເຮັດວຽກ</h3>
+<div class="space-y-4">
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">5.1 ມີທັດສະນະຄະຕິທີ່ດີ (Positive Attitude) ຕໍ່ວຽກງານ ແລະ ອົງກອນ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_5_1"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">5.2 ເປີດຮັບການປ່ຽນແປງ, ສິ່ງທ້າທາຍໃໝ່ໆ ແລະ ພ້ອມທີ່ຈະຮຽນຮູ້ສະເໝີ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_5_2"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<p class="text-sm font-semibold text-slate-700 mb-3">5.3 ມີຄວາມກະຕືລືລົ້ນ, ຕັ້ງໃຈ ແລະ ເຮັດວຽກຢ່າງເຕັມຄວາມສາມາດ</p>
+<div class="flex justify-between items-center max-w-sm mx-auto">
+<span class="text-xs text-slate-400">ຕ່ຳ</span>
+<div class="flex space-x-2 md:space-x-3" id="q_5_3"></div>
+<span class="text-xs text-slate-400">ສູງ</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="mt-8 flex space-x-3">
+<button onclick="prevStep(2)" class="w-1/3 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-3.5 px-4 rounded-xl transition-all duration-200 text-sm">
+ກັບຄືນ
+</button>
+<button onclick="nextStep(4)" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 text-sm">
+<span>ຖັດໄປ</span>
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+
+<!-- STEP 4: OPEN ENDED QUESTIONS & OVERALL RATING -->
+<div id="step-4" class="step-content hidden">
+<div class="mb-6 flex justify-between items-center">
+<span class="text-xs font-semibold bg-emerald-100 text-emerald-800 py-1 px-3 rounded-full">ຂັ້ນຕອນທີ 3: ຄຳຖາມປາຍເປີດ & ພາບລວມ</span>
+<span class="text-xs text-slate-500 font-medium">ໜ້າ 3 / 3</span>
+</div>
+
+<div class="space-y-6">
+<!-- Part 3: Open Ended -->
+<div>
+<h3 class="text-md font-bold text-slate-800 border-l-4 border-emerald-500 pl-2 mb-3">ພາກທີ 3: ຄຳຖາມປາຍເປີດ (ຄຳຄິດເຫັນເພີ່ມເຕີມ)</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-slate-700 text-xs font-semibold mb-1" for="strength">
+1. ຈຸດແຂງ ຫຼື ຈຸດເດັ່ນ ຂອງຜູ້ຮັບການປະເມີນ:
+</label>
+<textarea id="strength" rows="3" placeholder="ກະລຸນາລະບຸຈຸດແຂງຂອງເພິ່ນ..." class="w-full p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-all"></textarea>
+</div>
+<div>
+<label class="block text-slate-700 text-xs font-semibold mb-1" for="weakness">
+2. ຈຸດທີ່ຄວນປັບປຸງ ຫຼື ຄວນພັດທະນາ:
+</label>
+<textarea id="weakness" rows="3" placeholder="ກະລຸນາລະບຸຈຸດທີ່ຄວນພັດທະນາ..." class="w-full p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-all"></textarea>
+</div>
+<div>
+<label class="block text-slate-700 text-xs font-semibold mb-1" for="suggestion">
+3. ຂໍ້ສະເໜີແນະເພື່ອການພັດທະນາໃນອະນາຄົດ:
+</label>
+<textarea id="suggestion" rows="3" placeholder="ກະລຸນາລະບຸຂໍ້ສະເໜີແນະ..." class="w-full p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-all"></textarea>
+</div>
+</div>
+</div>
+
+<!-- Part 4: Overall Feedback -->
+<div>
+<h3 class="text-md font-bold text-slate-800 border-l-4 border-emerald-500 pl-2 mb-3">ພາກທີ 4: ການປະເມີນໂດຍລວມ</h3>
+<div class="bg-white border border-slate-150 p-4 rounded-xl">
+<label class="block text-slate-700 text-sm font-semibold mb-3">
+ໂດຍລວມແລ້ວ ທ່ານປະເມີນຜົນການເຮັດວຽກຂອງບຸກຄົນນີ້ຢູ່ໃນລະດັບໃດ?
+</label>
+<div class="grid grid-cols-1 gap-2">
+<label class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer">
+<input type="radio" name="overallRating" value="ດີເລີດ" class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+<span class="ml-3 text-sm font-medium text-slate-700">ດີເລີດ</span>
+</label>
+<label class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer">
+<input type="radio" name="overallRating" value="ດີຫຼາຍ" class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+<span class="ml-3 text-sm font-medium text-slate-700">ດີຫຼາຍ</span>
+</label>
+<label class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer">
+<input type="radio" name="overallRating" value="ດີ" class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+<span class="ml-3 text-sm font-medium text-slate-700">ດີ</span>
+</label>
+<label class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer">
+<input type="radio" name="overallRating" value="ພໍໃຊ້" class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+<span class="ml-3 text-sm font-medium text-slate-700">ພໍໃຊ້</span>
+</label>
+<label class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer">
+<input type="radio" name="overallRating" value="ຄວນປັບປຸງ" class="w-4 h-4 text-emerald-600 border-slate-300 focus:ring-emerald-500">
+<span class="ml-3 text-sm font-medium text-slate-700">ຄວນປັບປຸງ</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+
+<div class="mt-8 flex space-x-3">
+<button onclick="prevStep(3)" class="w-1/3 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-3.5 px-4 rounded-xl transition-all duration-200 text-sm">
+ກັບຄືນ
+</button>
+<button onclick="submitAssessment()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 text-sm">
+<i class="fa-solid fa-paper-plane mr-2"></i>
+<span>ສົ່ງແບບປະເມີນ</span>
+</button>
+</div>
+</div>
+
+<!-- STEP 5: SUCCESS / CONFIRMATION -->
+<div id="step-5" class="step-content hidden text-center py-10">
+<div class="w-24 h-24 bg-emerald-50 rounded-full mx-auto flex items-center justify-center mb-6 border border-emerald-100 shadow-inner">
+<i class="fa-solid fa-circle-check text-emerald-500 text-5xl animate-bounce"></i>
+</div>
+<h2 class="text-2xl font-bold text-slate-800 mb-2">ສົ່ງແບບປະເມີນສຳເລັດແລ້ວ!</h2>
+<p class="text-slate-500 text-sm max-w-md mx-auto mb-8">
+ຂໍ້ມູນຂອງທ່ານໄດ້ຮັບການບັນທຶກ ແລະ ສົ່ງໄປຍັງຖານຂໍ້ມູນຢ່າງປອດໄພແລ້ວ. ຂໍຂອບໃຈໃນການຮ່ວມມືປະເມີນຄັ້ງນີ້.
+</p>
+<button onclick="resetForm()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-95 text-sm">
+<i class="fa-solid fa-redo mr-2"></i> ເລີ່ມຕົ້ນປະເມີນໃໝ່
+</button>
+</div>
+
+</div>
+</div>
+</main>
+
+<!-- FOOTER SECTION -->
+<footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
+<div class="max-w-4xl mx-auto px-4">
+<p class="mb-2">© 2026 ບໍລິສັດລາວສືມຸລະ ຈຳກັດ. ລະບົບສະຫງວນລິຂະສິດ.</p>
+<p class="text-[10px] text-slate-600">Powered by n8n Flow & Custom Frontend integration</p>
+</div>
+</footer>
+
+<!-- HR / ADMIN AUTHENTICATION MODAL (ຕ້ອງຢືນຢັນລະຫັດຜ່ານກ່ອນເຂົ້າ Settings) -->
+<div id="authModal" class="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm hidden flex items-center justify-center p-4">
+<div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl border border-slate-100 p-6 text-center">
+<div class="w-16 h-16 bg-red-50 rounded-full mx-auto flex items-center justify-center mb-4 border border-red-100">
+<i class="fa-solid fa-shield-halved text-red-500 text-2xl"></i>
+</div>
+<h3 class="text-md font-bold text-slate-800 mb-1">ຢືນຢັນຕົວຕົນ (HR / Admin)</h3>
+<p class="text-xs text-slate-500 mb-4">ກະລຸນາປ້ອນລະຫັດຜ່ານເພື່ອເຂົ້າສູ່ການຕັ້ງຄ່າລະບົບ</p>
+<input type="password" id="adminPasswordInput" placeholder="ປ້ອນລະຫັດຜ່ານ..." autocomplete="off"
+class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-center mb-4"
+onkeydown="if(event.key==='Enter'){confirmAdminAuth();}">
+<div class="flex space-x-3">
+<button onclick="closeAuthModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm">
+ຍົກເລີກ
+</button>
+<button onclick="confirmAdminAuth()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg transition-all duration-200 text-sm">
+ຢືນຢັນ
+</button>
+</div>
+</div>
+</div>
+
+<!-- CONFIGURATION SETTINGS & DATA MANAGEMENT MODAL -->
+<div id="settingsModal" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+<div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden transform transition-all">
+<div class="bg-emerald-800 text-white px-6 py-4 flex justify-between items-center">
+<h3 class="font-bold flex items-center text-sm md:text-md">
+<i class="fa-solid fa-gears mr-2 text-emerald-300"></i> ຕັ້ງຄ່າຂໍ້ມູນ & Integration (HR / Admin)
+</h3>
+<button onclick="toggleSettingsModal()" class="text-emerald-100 hover:text-white transition-colors duration-150 text-xl">
+<i class="fa-solid fa-times"></i>
+</button>
+</div>
+<div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+<!-- Tab Selector for Settings -->
+<div class="flex border-b border-slate-200">
+<button onclick="switchSettingsTab('webhook')" id="tabBtn-webhook" class="w-1/2 py-2 text-center text-xs font-bold text-emerald-600 border-b-2 border-emerald-600">
+<i class="fa-solid fa-link mr-1"></i> n8n Webhook
+</button>
+<button onclick="switchSettingsTab('data')" id="tabBtn-data" class="w-1/2 py-2 text-center text-xs font-bold text-slate-500 hover:text-emerald-600 border-b-2 border-transparent">
+<i class="fa-solid fa-database mr-1"></i> ຈັດການລາຍຊື່ & ພະແນກ
+</button>
+</div>
+
+<!-- Webhook Tab Content -->
+<div id="tabContent-webhook" class="space-y-4">
+<div>
+<label class="block text-xs font-semibold text-slate-500 mb-1">
+N8N WEBHOOK URL (POST)
+</label>
+<input type="text" id="webhookUrlInput" placeholder="https://primary-production.up.railway.app/webhook/..."
+class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+<p class="text-[10px] text-slate-400 mt-1">
+ວາງ URL Webhook ທີ່ໄດ້ຈາກ n8n ຂອງເຈົ້າ (ໃຊ້ສຳລັບຮັບຄ່າ payload ຕອນກົດ ສົ່ງແບບປະເມີນ).
+</p>
+</div>
+<div class="bg-slate-50 p-3 rounded-lg border border-slate-150">
+<h5 class="text-slate-700 font-bold text-[10px] uppercase mb-1">Payload JSON Format</h5>
+<pre class="text-[9px] font-mono text-slate-500 overflow-x-auto max-h-24 bg-slate-100 p-2 rounded">
+{
+"timestamp": "2026-07-02T09:40:00.000Z",
+"targetName": "LT2008_Paphavady",
+"evaluatorRole": "ຫົວໜ້າງານ",
+"department": "IT Department",
+...
+}</pre>
+</div>
+</div>
+
+<!-- Data Management Tab Content -->
+<div id="tabContent-data" class="space-y-4 hidden">
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1">
+<i class="fa-solid fa-user-group text-emerald-600 mr-1"></i> ລາຍຊື່ຜູ້ຮັບການປະເມີນ (ແຍກດ້ວຍເຄື່ອງໝາຍຈຸດ `,` ຫຼື ຍໍ້ແຖວ)
+</label>
+<textarea id="employeesInput" rows="4" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+<p class="text-[10px] text-slate-400 mt-1">
+ທ່ານສາມາດເພີ່ມ, ແກ້ໄຂ ຫຼື ປ່ຽນແປງລາຍຊື່ພະນັກງານໄດ້ທີ່ນີ້. (ລະບົບຈະບັນທຶກໄວ້ໃນເຄື່ອງອັດຕະໂນມັດ).
+</p>
+</div>
+
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1">
+<i class="fa-solid fa-sitemap text-emerald-600 mr-1"></i> ລາຍຊື່ພະແນກ / ໜ່ວຍງານ (ແຍກດ້ວຍເຄື່ອງໝາຍຈຸດ `,` ຫຼື ຍໍ້ແຖວ)
+</label>
+<textarea id="departmentsInput" rows="4" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+</div>
+</div>
+</div>
+<div class="bg-slate-100 px-6 py-4 flex justify-end space-x-2">
+<button onclick="toggleSettingsModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 rounded-lg">
+ຍົກເລີກ
+</button>
+<button onclick="saveAllSettings()" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white rounded-lg shadow">
+<i class="fa-solid fa-save mr-1"></i> ບັນທຶກທັງໝົດ
+</button>
+</div>
+</div>
+</div>
+
+<!-- INTERACTIVE ENGINE / APP LOGIC -->
+<script>
+// Default Static Datasets (Fallback & Initial values)
+const defaultEmployees = [
+"LT2008_Paphavady",
+"LT2009_Bounmy_Sengchanh",
+"LT2010_Somsack_Phoxay",
+"LT2011_Keo_Keomanivong",
+"LT2012_Saysana_Soukhavong",
+"LT2013_Malayvanh_Inthavong"
+];
+
+const defaultDepartments = [
+"IT Department",
+"Human Resources (HR)",
+"Finance & Accounting",
+"Marketing & Sales",
+"Customer Support",
+"Operations"
+];
+
+// State variables
+let currentStep = 1;
+let n8nWebhookUrl = localStorage.getItem('n8n_webhook_url') || 'https://YOUR_N8N_INSTANCE_OR_TUNNEL/webhook/360-evaluation';
+let employeeList = JSON.parse(localStorage.getItem('app_employee_list')) || defaultEmployees;
+let departmentList = JSON.parse(localStorage.getItem('app_department_list')) || defaultDepartments;
+// Define all question ids to build scales
+const questions = [
+'q_1_1', 'q_1_2', 'q_1_3',
+'q_2_1', 'q_2_2', 'q_2_3',
+'q_3_1', 'q_3_2', 'q_3_3',
+'q_4_1', 'q_4_2', 'q_4_3',
+'q_5_1', 'q_5_2', 'q_5_3'
+];
+
+// Store selected answers
+const selectedScores = {};
+
+// On window load
+window.onload = function() {
+// Document webhook initialized
+document.getElementById('webhookUrlInput').value = n8nWebhookUrl;
+// Set textareas initial values
+document.getElementById('employeesInput').value = employeeList.join(',\n');
+document.getElementById('departmentsInput').value = departmentList.join(',\n');
+// Render Dynamic Dropdowns
+renderDropdowns();
+// Build rating scales programmatically
+questions.forEach(qId => {
+const container = document.getElementById(qId);
+if (container) {
+for (let score = 1; score <= 5; score++) {
+const btn = document.createElement('button');
+btn.type = 'button';
+btn.className = `w-8 h-8 md:w-10 md:h-10 rounded-full border border-slate-300 text-xs md:text-sm font-bold flex items-center justify-center transition-all duration-200 outline-none hover:bg-emerald-50 hover:border-emerald-400 focus:ring-2 focus:ring-offset-1 focus:ring-emerald-400`;
+btn.innerText = score;
+btn.id = `${qId}_btn_${score}`;
+btn.onclick = () => selectScore(qId, score);
+container.appendChild(btn);
+}
+}
+});
+};
+
+// Render Dropdown options dynamically from local data state
+function renderDropdowns() {
+const empDropdown = document.getElementById('targetName');
+empDropdown.innerHTML = '<option value="" disabled selected>-- ເລືອກຜູ້ຮັບການປະເມີນ --</option>';
+employeeList.forEach(emp => {
+const opt = document.createElement('option');
+opt.value = emp;
+opt.innerText = emp;
+empDropdown.appendChild(opt);
+});
+
+const deptDropdown = document.getElementById('department');
+deptDropdown.innerHTML = '<option value="" disabled selected>-- ເລືອກພະແນກ --</option>';
+departmentList.forEach(dept => {
+const opt = document.createElement('option');
+opt.value = dept;
+opt.innerText = dept;
+deptDropdown.appendChild(opt);
+});
+}
+
+// Switch settings tab within modal
+function switchSettingsTab(tabName) {
+const tabs = ['webhook', 'data'];
+tabs.forEach(t => {
+const btn = document.getElementById(`tabBtn-${t}`);
+const content = document.getElementById(`tabContent-${t}`);
+if (t === tabName) {
+btn.className = "w-1/2 py-2 text-center text-xs font-bold text-emerald-600 border-b-2 border-emerald-600";
+content.classList.remove('hidden');
+} else {
+btn.className = "w-1/2 py-2 text-center text-xs font-bold text-slate-500 hover:text-emerald-600 border-b-2 border-transparent";
+content.classList.add('hidden');
+}
+});
+}
+
+// Save All Settings (Webhook, Employees, and Departments)
+function saveAllSettings() {
+// Save Webhook Target
+const webhookVal = document.getElementById('webhookUrlInput').value.trim();
+if (webhookVal) {
+n8nWebhookUrl = webhookVal;
+localStorage.setItem('n8n_webhook_url', webhookVal);
+}
+
+// Parse and Save Employee List
+const empRaw = document.getElementById('employeesInput').value;
+const parsedEmployees = empRaw.split(/[,\n]+/).map(item => item.trim()).filter(item => item.length > 0);
+if (parsedEmployees.length > 0) {
+employeeList = parsedEmployees;
+localStorage.setItem('app_employee_list', JSON.stringify(parsedEmployees));
+}
+
+// Parse and Save Department List
+const deptRaw = document.getElementById('departmentsInput').value;
+const parsedDepartments = deptRaw.split(/[,\n]+/).map(item => item.trim()).filter(item => item.length > 0);
+if (parsedDepartments.length > 0) {
+departmentList = parsedDepartments;
+localStorage.setItem('app_department_list', JSON.stringify(parsedDepartments));
+}
+
+// Re-render first step options
+renderDropdowns();
+showCustomNotification('ບັນທຶກການຕັ້ງຄ່າ ແລະ ປັບປຸງຂໍ້ມູນສຳເລັດແລ້ວ!', 'success');
+toggleSettingsModal();
+}
+
+// Handle score selections
+function selectScore(qId, score) {
+for (let i = 1; i <= 5; i++) {
+const btn = document.getElementById(`${qId}_btn_${i}`);
+if (btn) {
+btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600', 'scale-110', 'shadow-md');
+btn.classList.add('border-slate-300', 'text-slate-700');
+}
+}
+const activeBtn = document.getElementById(`${qId}_btn_${score}`);
+if (activeBtn) {
+activeBtn.classList.remove('border-slate-300', 'text-slate-700');
+activeBtn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600', 'scale-110', 'shadow-md');
+}
+selectedScores[qId] = score;
+}
+
+// Toggle modal visibility
+function toggleSettingsModal() {
+const modal = document.getElementById('settingsModal');
+modal.classList.toggle('hidden');
+}
+
+// ==== HR / Admin Password Protection ====
+// ໝາຍເຫດ: ນີ້ເປັນການປ້ອງກັນຂັ້ນພື້ນຖານຝັ່ງ client ເທົ່ານັ້ນ (ເໝາະສຳລັບກັນຄົນທົ່ວໄປກົດຫຼິ້ນ,
+// ບໍ່ແມ່ນ security ລະດັບສູງ ເພາະລະຫັດຜ່ານຢູ່ໃນ source code ທີ່ browser ອ່ານໄດ້).
+// ປ່ຽນລະຫັດຜ່ານໄດ້ທີ່ຄ່ານີ້:
+const ADMIN_PASSWORD = 'admin@2026';
+
+function openAuthModal() {
+document.getElementById('adminPasswordInput').value = '';
+document.getElementById('authModal').classList.remove('hidden');
+setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+}
+
+function closeAuthModal() {
+document.getElementById('authModal').classList.add('hidden');
+document.getElementById('adminPasswordInput').value = '';
+}
+
+function confirmAdminAuth() {
+const entered = document.getElementById('adminPasswordInput').value;
+if (entered === ADMIN_PASSWORD) {
+closeAuthModal();
+document.getElementById('settingsModal').classList.remove('hidden');
+} else {
+showCustomNotification('ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ, ກະລຸນາລອງໃໝ່', 'error');
+document.getElementById('adminPasswordInput').value = '';
+document.getElementById('adminPasswordInput').focus();
+}
+}
+
+// Custom friendly non-blocking notification alert
+function showCustomNotification(msg, type = 'success') {
+const container = document.createElement('div');
+container.className = `fixed bottom-6 right-6 z-50 transform translate-y-10 opacity-0 transition-all duration-300 bg-white border rounded-xl shadow-2xl p-4 max-w-sm flex items-center space-x-3 ${type === 'success' ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`;
+const icon = document.createElement('i');
+icon.className = type === 'success' ? 'fa-solid fa-circle-check text-emerald-600 text-lg' : 'fa-solid fa-triangle-exclamation text-red-600 text-lg';
+const txt = document.createElement('p');
+txt.className = `text-xs font-semibold ${type === 'success' ? 'text-emerald-800' : 'text-red-800'}`;
+txt.innerText = msg;
+container.appendChild(icon);
+container.appendChild(txt);
+document.body.appendChild(container);
+setTimeout(() => {
+container.classList.remove('translate-y-10', 'opacity-0');
+}, 10);
+setTimeout(() => {
+container.classList.add('translate-y-10', 'opacity-0');
+setTimeout(() => container.remove(), 300);
+}, 3500);
+}
+
+// Validate current step inputs
+function validateStep(step) {
+if (step === 1) {
+const target = document.getElementById('targetName').value;
+const role = document.getElementById('evaluatorRole').value;
+const dept = document.getElementById('department').value;
+
+if (!target) {
+showCustomNotification('ກະລຸນາເລືອກ ຜູ້ຮັບການປະເມີນ', 'error');
+return false;
+}
+if (!role) {
+showCustomNotification('ກະລຸນາເລືອກ ບົດບາດຂອງທ່ານ', 'error');
+return false;
+}
+if (!dept) {
+showCustomNotification('ກະລຸນາເລືອກ ພະແນກ / ໜ່ວຍງານ', 'error');
+return false;
+}
+return true;
+}
+
+if (step === 2) {
+const firstBatch = ['q_1_1', 'q_1_2', 'q_1_3', 'q_2_1', 'q_2_2', 'q_2_3'];
+for (let q of firstBatch) {
+if (!selectedScores[q]) {
+showCustomNotification('ກະລຸນາຕອບຄຳຖາມໃນໝວດທີ 1 ແລະ 2 ໃຫ້ຄົບຖ້ວນ', 'error');
+return false;
+}
+}
+return true;
+}
+
+if (step === 3) {
+const secondBatch = ['q_3_1', 'q_3_2', 'q_3_3', 'q_4_1', 'q_4_2', 'q_4_3', 'q_5_1', 'q_5_2', 'q_5_3'];
+for (let q of secondBatch) {
+if (!selectedScores[q]) {
+showCustomNotification('ກະລຸນາຕອບຄຳຖາມໃນໝວດທີ 3, 4 ແລະ 5 ໃຫ້ຄົບຖ້ວນ', 'error');
+return false;
+}
+}
+return true;
+}
+
+if (step === 4) {
+const checked = document.querySelector('input[name="overallRating"]:checked');
+if (!checked) {
+showCustomNotification('ກະລຸນາເລືອກ ລະດັບການປະເມີນໂດຍລວມ', 'error');
+return false;
+}
+return true;
+}
+
+return true;
+}
+
+// Transition logic
+function nextStep(step) {
+if (validateStep(currentStep)) {
+document.getElementById(`step-${currentStep}`).classList.add('hidden');
+document.getElementById(`step-${step}`).classList.remove('hidden');
+currentStep = step;
+const pBar = document.getElementById('progressBar');
+const pBarContainer = document.getElementById('progressBarContainer');
+if (step > 1 && step < 5) {
+pBarContainer.classList.remove('hidden');
+const pct = ((step - 1) / 3) * 100;
+pBar.style.width = `${pct}%`;
+} else {
+pBarContainer.classList.add('hidden');
+}
+window.scrollTo({top: 0, behavior: 'smooth'});
+}
+}
+
+// Go back
+function prevStep(step) {
+document.getElementById(`step-${currentStep}`).classList.add('hidden');
+document.getElementById(`step-${step}`).classList.remove('hidden');
+currentStep = step;
+
+const pBar = document.getElementById('progressBar');
+const pBarContainer = document.getElementById('progressBarContainer');
+if (step > 1 && step < 5) {
+pBarContainer.classList.remove('hidden');
+const pct = ((step - 1) / 3) * 100;
+pBar.style.width = `${pct}%`;
+} else {
+pBarContainer.classList.add('hidden');
+}
+window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// POST Data Submission to n8n Webhook
+function submitAssessment() {
+if (!validateStep(4)) return;
+
+const payload = {
+timestamp: new Date().toISOString(),
+targetName: document.getElementById('targetName').value,
+evaluatorRole: document.getElementById('evaluatorRole').value,
+department: document.getElementById('department').value,
+evaluationRound: "ປະຈຳປີ 2026",
+scores: { ...selectedScores },
+feedback: {
+strength: document.getElementById('strength').value.trim(),
+weakness: document.getElementById('weakness').value.trim(),
+suggestion: document.getElementById('suggestion').value.trim()
+},
+overall: document.querySelector('input[name="overallRating"]:checked').value
+};
+
+const submitBtn = document.querySelector('#step-4 button:last-child');
+const originalText = submitBtn.innerHTML;
+submitBtn.disabled = true;
+submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> ກຳລັງສົ່ງ...`;
+
+// DEBUG: ເບິ່ງໃນ Console (F12) ວ່າຍິງໄປໃສ ແລະ ຜົນຄືແນວໃດແທ້ໆ
+console.log("[360-Feedback] ກຳລັງສົ່ງໄປຫາ webhook URL:", n8nWebhookUrl);
+console.log("[360-Feedback] Payload:", payload);
+
+fetch(n8nWebhookUrl, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'ngrok-skip-browser-warning': 'true'
+},
+body: JSON.stringify(payload)
+})
+.then(res => {
+console.log("[360-Feedback] HTTP status ທີ່ໄດ້ຮັບກັບຄືນ:", res.status);
+if (!res.ok) throw new Error(`Server ຕອບກັບ status ${res.status}`);
+return res.text();
+})
+.then(data => {
+console.log("[360-Feedback] ສົ່ງສຳເລັດ, ຄຳຕອບຈາກ n8n:", data);
+nextStep(5);
+})
+.catch(err => {
+console.error("[360-Feedback] ສົ່ງຂໍ້ມູນລົ້ມເຫລວ:", err);
+showCustomNotification("ສົ່ງຂໍ້ມູນລົ້ມເຫລວ! ກະລຸນາກວດ Webhook URL ຫຼືເບິ່ງລາຍລະອຽດໃນ Console (F12): " + err.message, "error");
+})
+.finally(() => {
+submitBtn.disabled = false;
+submitBtn.innerHTML = originalText;
+});
+}
+
+// Reset all fields
+function resetForm() {
+document.getElementById('targetName').selectedIndex = 0;
+document.getElementById('evaluatorRole').selectedIndex = 0;
+document.getElementById('department').selectedIndex = 0;
+document.getElementById('strength').value = '';
+document.getElementById('weakness').value = '';
+document.getElementById('suggestion').value = '';
+const checkedRadio = document.querySelector('input[name="overallRating"]:checked');
+if (checkedRadio) checkedRadio.checked = false;
+
+questions.forEach(qId => {
+delete selectedScores[qId];
+for (let i = 1; i <= 5; i++) {
+const btn = document.getElementById(`${qId}_btn_${i}`);
+if (btn) {
+btn.className = `w-8 h-8 md:w-10 md:h-10 rounded-full border border-slate-300 text-xs md:text-sm font-bold flex items-center justify-center transition-all duration-200 outline-none hover:bg-emerald-50 hover:border-emerald-400 focus:ring-2 focus:ring-offset-1 focus:ring-emerald-400`;
+}
+}
+});
+
+nextStep(1);
+}
+</script>
+</body>
+</html>
