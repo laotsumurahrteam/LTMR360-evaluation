@@ -525,7 +525,7 @@ class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono foc
 <div id="tabContent-data" class="space-y-4 hidden">
 <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
 <p class="text-[11px] text-amber-800 leading-relaxed">
-⚠️ <strong>ແຫຼ່ງຂໍ້ມູນຫຼັກຕອນນີ້ຄື Google Sheet (tab "Setting")</strong> — ລະບົບຈະດຶງລາຍຊື່ຈາກ Sheet ນັ້ນອັດຕະໂນມັດທຸກຄັ້ງທີ່ເປີດໜ້ານີ້ ແລ້ວທັບຄ່າຂ້າງລຸ່ມນີ້.
+⚠️ <strong>ແຫຼ່ງຂໍ້ມູນຫຼັກຕອນນີ້ຄື Google Sheet ແຍກຕ່າງຫາກຊື່ "MasterList_Public"</strong> (ບໍ່ແມ່ນ Sheet ຄະແນນຫຼັກ, ເພື່ອຄວາມປອດໄພ) — ລະບົບຈະດຶງລາຍຊື່ຈາກ Sheet ນັ້ນອັດຕະໂນມັດທຸກຄັ້ງທີ່ເປີດໜ້ານີ້ ແລ້ວທັບຄ່າຂ້າງລຸ່ມນີ້.
 ຢາກແກ້ໄຂລາຍຊື່ຖາວອນ ໃຫ້ໄປແກ້ໃນ Google Sheet ໂດຍກົງ (ບໍ່ຕ້ອງແຕະໂຄ້ດ). ຊ່ອງລຸ່ມນີ້ເປັນແຄ່ backup/override ສະເພາະ browser ນີ້ ໃນກໍລະນີສຸກເສີນທີ່ Sheet ເປີດບໍ່ໄດ້ຊົ່ວຄາວ.
 </p>
 </div>
@@ -587,9 +587,9 @@ let employeeList = JSON.parse(localStorage.getItem('app_employee_list')) || defa
 let departmentList = JSON.parse(localStorage.getItem('app_department_list')) || defaultDepartments;
 
 // ==== ດຶງລາຍຊື່ພະນັກງານ / ພະແນກ ຈາກ Google Sheet ໂດຍກົງ (ແຫຼ່ງຂໍ້ມູນຫຼັກ, ຖາວອນ) ====
-// HR ພຽງແຕ່ແກ້ໄຂ tab "Setting" ໃນ Google Sheet (ຄໍລຳ A = ຊື່ພະນັກງານ, ຄໍລຳ B = ພະແນກ)
+// HR ພຽງແຕ່ແກ້ໄຂ Google Sheet ຊື່ "MasterList_Public" (ຄໍລຳ A = ຊື່ພະນັກງານ, ຄໍລຳ B = ພະແນກ)
 // ໂດຍບໍ່ຕ້ອງແຕະໂຄ້ດ ຫຼື deploy ໃໝ່ - ທຸກຄົນທຸກອຸປະກອນຈະເຫັນລາຍຊື່ອັບເດດອັດຕະໂນມັດ
-const MASTER_LIST_CSV_URL = 'https://docs.google.com/spreadsheets/d/1EU4AB7WjRpe2qrTfKzAK_Qr3iy5jVunQWD6Qt6L4OaE/gviz/tq?tqx=out:csv&gid=171676066';
+const MASTER_LIST_CSV_URL = 'https://docs.google.com/spreadsheets/d/11rw6nNkh9bj5tjAZGGovFTHj3XOYrD0_1cMFtDw4o04/gviz/tq?tqx=out:csv&gid=0';
 
 // ຕົວແຍກ CSV ແບບພື້ນຖານ (ຮອງຮັບຄ່າທີ່ຄອບດ້ວຍ " ແລະ ມີ , ຢູ່ພາຍໃນ)
 function parseCSV(text) {
